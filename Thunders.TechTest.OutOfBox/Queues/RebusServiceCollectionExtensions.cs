@@ -13,7 +13,7 @@ namespace Thunders.TechTest.OutOfBox.Queues
             SubscriptionBuilder? subscriptionBuilder = null)
         {
             services.AutoRegisterHandlersFromAssembly(Assembly.GetEntryAssembly());
-
+            var teste = configuration.GetConnectionString("RabbitMq");
             services.AddRebus(c => c
                 .Transport(t =>
                 {
