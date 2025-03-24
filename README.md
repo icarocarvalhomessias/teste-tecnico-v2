@@ -3,9 +3,7 @@
 ## Visão Geral
 Este repositório contém vários projetos que compõem a solução Thunders.TechTest, desenvolvida em .NET 8. A solução é composta pelos seguintes projetos:
 - **Thunders.TechTest.ApiService**: Serviço principal da API que lida com as operações de criação e consulta de tickets.
-- **Thunders.TechTest.Application**: Contém a lógica de aplicação, incluindo comandos e consultas.
-- **Thunders.TechTest.Domain**: Define as entidades de domínio e interfaces de repositório.
-- **Thunders.TechTest.Infrastructure**: Implementa a persistência de dados, incluindo a configuração do MongoDB.
+- **Thunders.TechTest.ApiService.Application**: Contém a lógica de aplicação, incluindo comandos e consultas.
 
 ## Thunders.TechTest.ApiService
 
