@@ -1,36 +1,51 @@
-using Microsoft.EntityFrameworkCore;
-using Thunders.TechTest.ApiService;
-using Thunders.TechTest.OutOfBox.Database;
-using Thunders.TechTest.OutOfBox.Queues;
+using MongoDB.Driver;
+using System.Net;
+using Thunders.TechTest.ApiService.Configuration;
+using Thunders.TechTest.ApiService.Data.MongoDb;
 
-var builder = WebApplication.CreateBuilder(args);
-
-builder.AddServiceDefaults();
-builder.Services.AddControllers();
-
-var features = Features.BindFromConfiguration(builder.Configuration);
-
-// Add services to the container.
-builder.Services.AddProblemDetails();
-
-if (features.UseMessageBroker)
+internal class Program
 {
-    builder.Services.AddBus(builder.Configuration, new SubscriptionBuilder());
+    private static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+        var configuration = builder.Configuration;
+        var hostEnvironment = builder.Environment;
+
+        builder.Configuration
+            .SetBasePath(hostEnvironment.ContentRootPath)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{hostEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+            .AddEnvironmentVariables();
+
+        builder.AddServiceDefaults();
+
+        builder.Services.AddApiConfiguration(builder.Configuration);
+
+        var app = builder.Build();
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            app.UseExceptionHandler("/Home/Error");
+            app.UseHsts();
+        }
+
+        app.UseSwaggerConfiguration();
+
+        app.MapDefaultEndpoints();
+        app.MapControllers();
+
+        // Configure MongoDB Indexes
+        using (var scope = app.Services.CreateScope())
+        {
+            var database = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
+            var indexConfigurator = new MongoDbIndexConfigurator(database);
+            indexConfigurator.ConfigureIndexes();
+        }
+
+        app.Run();
+    }
 }
-
-if (features.UseEntityFramework)
-{
-    builder.Services.AddSqlServerDbContext<DbContext>(builder.Configuration);
-}
-
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-app.UseExceptionHandler();
-
-app.MapDefaultEndpoints();
-
-app.MapControllers();
-
-app.Run();
